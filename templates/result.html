@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}분석 결과 - Link Shield{% endblock %}
+
+{% block content %}
+<div class="result-header">
+    <a href="{% url 'analyzer:index' %}" class="back-btn">
+        <span>←</span> 새로운 분석
+    </a>
+    <h1 class="result-title">분석 결과</h1>
+</div>
+
+<!-- URL 정보 카드 -->
+<div class="card result-card">
+    <div class="card-header">
+        <h2>🔗 분석된 URL</h2>
+        <div class="status-badge status-complete">분석 완료</div>
+    </div>
+    <div class="card-body">
+        <div class="url-display">
+            <div class="url-label">입력 URL</div>
+            <div class="url-value">{{ result.original_url }}</div>
+        </div>
+        {% if result.final_url != result.original_url %}
+        <div class="url-display redirect-info">
+            <div class="url-label">
+                <span class="redirect-icon">🔄</span> 최종 URL
+            </div>
+            <div class="url-value">{{ result.final_url }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 스크린샷 카드 -->
+<div class="card result-card">
+    <div class="card-header">
+        <h2>📸 페이지 스크린샷</h2>
+    </div>
+    <div class="card-body">
+        <div class="screenshot-container">
+            {% if result.screenshot %}
+                <img src="{{ result.screenshot }}" alt="페이지 스크린샷" class="screenshot-img">
+            {% else %}
+                <div class="screenshot-placeholder">
+                    <div class="placeholder-icon">🖼️</div>
+                    <p>스크린샷을 생성할 수 없습니다</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 메타데이터 카드 -->
+<div class="card result-card">
+    <div class="card-header">
+        <h2>📋 페이지 정보</h2>
+    </div>
+    <div class="card-body">
+        <div class="metadata-grid">
+            <div class="metadata-item">
+                <div class="metadata-label">페이지 제목</div>
+                <div class="metadata-value">{{ result.page_title|default:"정보 없음" }}</div>
+            </div>
+            <div class="metadata-item">
+                <div class="metadata-label">도메인</div>
+                <div class="metadata-value">{{ result.domain }}</div>
+            </div>
+            <div class="metadata-item">
+                <div class="metadata-label">IP 주소</div>
+                <div class="metadata-value">{{ result.ip_address|default:"확인 중..." }}</div>
+            </div>
+            <div class="metadata-item">
+                <div class="metadata-label">분석 시간</div>
+                <div class="metadata-value">{{ result.analyzed_at }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 네트워크 활동 카드 -->
+<div class="card result-card">
+    <div class="card-header">
+        <h2>🌐 네트워크 활동</h2>
+    </div>
+    <div class="card-body">
+        <div class="network-stats">
+            <div class="stat-item">
+                <div class="stat-number">{{ result.network_requests|default:"0" }}</div>
+                <div class="stat-label">네트워크 요청</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ result.redirects|default:"0" }}</div>
+                <div class="stat-label">리다이렉션</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ result.js_errors|default:"0" }}</div>
+                <div class="stat-label">JS 오류</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 위험도 평가 카드 (데모용) -->
+<div class="card result-card risk-card">
+    <div class="card-header">
+        <h2>⚡ 종합 평가</h2>
+    </div>
+    <div class="card-body">
+        <div class="risk-score">
+            <div class="score-circle score-{{ result.risk_level|default:'low' }}">
+                <div class="score-value">{{ result.risk_score|default:"25" }}</div>
+                <div class="score-max">/100</div>
+            </div>
+            <div class="risk-description">
+                <h3 class="risk-title">{{ result.risk_label|default:"낮은 위험도" }}</h3>
+                <p>{{ result.risk_message|default:"현재까지 발견된 명백한 위협 요소는 없습니다. 하지만 항상 주의가 필요합니다." }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 다시 분석 버튼 -->
+<div class="action-section">
+    <a href="{% url 'analyzer:index' %}" class="action-btn">
+        <span>🔍</span>
+        다른 URL 분석하기
+    </a>
+</div>
+{% endblock %}

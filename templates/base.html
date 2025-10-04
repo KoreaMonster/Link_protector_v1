@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Link Shield{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <!-- 헤더 영역 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="{% url 'analyzer:index' %}" class="logo">
+                    <div class="shield-icon">🛡️</div>
+                    <span>Link Shield</span>
+                </a>
+                <nav class="nav">
+                    <a href="{% url 'analyzer:index' %}" class="nav-link">홈</a>
+                    <a href="#" class="nav-link">소개</a>
+                    <a href="#" class="nav-link">문서</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="main">
+        <div class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- 푸터 영역 -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 Link Shield | 포트폴리오 프로젝트</p>
+            <p class="footer-sub">안전한 웹 탐색을 위한 URL 분석 도구</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
