@@ -37,7 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #로컬 앱
     'analyzer.apps.AnalyzerConfig',
+    #Third party apps
+    "rest_framework"
 ]
 
 MIDDLEWARE = [
@@ -125,3 +128,36 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# DRF 설정 추가 (파일 맨 아래)
+REST_FRAMEWORK = {
+    # 기본 응답 렌더러
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',  # 개발용 웹 인터페이스 - 나중에 꺼야함
+    ],
+
+    # 기본 파서 -> 파일 업로드 api 생성을 위해
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+    ],
+
+    # 페이지네이션
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+
+    # 권한 설정 (현재는 모두 허용)
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+
+    # 인증 설정 (나중에 추가 가능)
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.SessionAuthentication',
+    # ],
+
+    # 날짜 포맷
+    'DATETIME_FORMAT': '%Y-%m-%d %H:%M:%S',
+}
