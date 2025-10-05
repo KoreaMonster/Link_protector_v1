@@ -10,7 +10,7 @@
 </div>
 
 <div class="card main-card">
-    <form method="POST" action="{% url 'analyzer:analyze' %}" class="analysis-form" id="analysisForm">
+    <form id="analysisForm" class="analysis-form">
         {% csrf_token %}
 
         <div class="form-group">
@@ -77,43 +77,43 @@
                 <span class="sample-badge">일반 웹사이트</span>
             </div>
             <div class="sample-list">
-                <button class="sample-item" onclick="fillURL('https://www.google.com')">
+                <button type="button" class="sample-item" onclick="fillURL('https://www.google.com')">
                     <span class="sample-icon">🌐</span>
                     <span class="sample-url">google.com</span>
                 </button>
-                <button class="sample-item" onclick="fillURL('https://www.naver.com')">
+                <button type="button" class="sample-item" onclick="fillURL('https://www.naver.com')">
                     <span class="sample-icon">🌐</span>
                     <span class="sample-url">naver.com</span>
                 </button>
-                <button class="sample-item" onclick="fillURL('https://www.youtube.com')">
+                <button type="button" class="sample-item" onclick="fillURL('https://www.youtube.com')">
                     <span class="sample-icon">🎥</span>
                     <span class="sample-url">youtube.com</span>
                 </button>
-                <button class="sample-item" onclick="fillURL('https://github.com')">
+                <button type="button" class="sample-item" onclick="fillURL('https://github.com')">
                     <span class="sample-icon">💻</span>
                     <span class="sample-url">github.com</span>
                 </button>
-                <button class="sample-item" onclick="fillURL('https://www.amazon.com')">
+                <button type="button" class="sample-item" onclick="fillURL('https://www.amazon.com')">
                     <span class="sample-icon">🛒</span>
                     <span class="sample-url">amazon.com</span>
                 </button>
-                <button class="sample-item" onclick="fillURL('https://stackoverflow.com')">
+                <button type="button" class="sample-item" onclick="fillURL('https://stackoverflow.com')">
                     <span class="sample-icon">💡</span>
                     <span class="sample-url">stackoverflow.com</span>
                 </button>
-                <button class="sample-item" onclick="fillURL('https://www.wikipedia.org')">
+                <button type="button" class="sample-item" onclick="fillURL('https://www.wikipedia.org')">
                     <span class="sample-icon">📚</span>
                     <span class="sample-url">wikipedia.org</span>
                 </button>
-                <button class="sample-item" onclick="fillURL('https://www.reddit.com')">
+                <button type="button" class="sample-item" onclick="fillURL('https://www.reddit.com')">
                     <span class="sample-icon">💬</span>
                     <span class="sample-url">reddit.com</span>
                 </button>
-                <button class="sample-item" onclick="fillURL('https://www.twitter.com')">
+                <button type="button" class="sample-item" onclick="fillURL('https://www.twitter.com')">
                     <span class="sample-icon">🐦</span>
                     <span class="sample-url">twitter.com</span>
                 </button>
-                <button class="sample-item" onclick="fillURL('https://www.linkedin.com')">
+                <button type="button" class="sample-item" onclick="fillURL('https://www.linkedin.com')">
                     <span class="sample-icon">💼</span>
                     <span class="sample-url">linkedin.com</span>
                 </button>
@@ -148,17 +148,31 @@
             </div>
         </div>
 
-        <!-- 박스 4: 최근 분석 URL (DB 연동 준비) -->
+        <!-- 박스 4: 최근 분석 URL (DB 연동) -->
         <div class="sample-box">
             <div class="sample-header">
                 <h3>🟣 최근 분석 URL</h3>
                 <span class="sample-badge">최신 10개</span>
             </div>
             <div class="sample-list" id="recentURLs">
-                <div class="sample-placeholder">
-                    <span class="placeholder-icon">💾</span>
-                    <p>분석 기록이 없습니다</p>
-                </div>
+                {% if recent_urls %}
+                    {% for item in recent_urls %}
+                    <button type="button" class="sample-item" onclick="fillURL('{{ item.original_url }}')">
+                        <span class="sample-icon">
+                            <img src="https://www.google.com/s2/favicons?domain={{ item.domain }}&sz=32"
+                                 alt="icon"
+                                 style="width: 18px; height: 18px;"
+                                 onerror="this.style.display='none'; this.parentElement.textContent='🌐';">
+                        </span>
+                        <span class="sample-url">{{ item.domain }}</span>
+                    </button>
+                    {% endfor %}
+                {% else %}
+                    <div class="sample-placeholder">
+                        <span class="placeholder-icon">💾</span>
+                        <p>분석 기록이 없습니다</p>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -175,15 +189,29 @@
 
 {% block extra_js %}
 <script>
+// CSRF 토큰 가져오기
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // URL 입력 필드에 자동 입력 함수
 function fillURL(url) {
     const urlInput = document.getElementById('url');
     urlInput.value = url;
 
-    // 입력 필드로 부드럽게 스크롤
     urlInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // 강조 효과
     urlInput.style.transition = 'all 0.3s ease';
     urlInput.style.borderColor = '#667eea';
     urlInput.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.2)';
@@ -194,35 +222,67 @@ function fillURL(url) {
     }, 1500);
 }
 
-// 폼 제출시 로딩 애니메이션
+// 폼 제출 처리 (API 호출)
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('analysisForm').addEventListener('submit', function(e) {
-        const submitBtn = this.querySelector('.submit-btn');
+    const form = document.getElementById('analysisForm');
+    const submitBtn = form.querySelector('.submit-btn');
+    const urlInput = document.getElementById('url');
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const url = urlInput.value.trim();
+
+        if (!url) {
+            alert('URL을 입력해주세요.');
+            return;
+        }
+
+        // 로딩 상태
+        const originalHTML = submitBtn.innerHTML;
         submitBtn.innerHTML = '<span class="spinner"></span><span>분석 중...</span>';
         submitBtn.disabled = true;
+
+        try {
+            // API 호출
+            const response = await fetch('/api/analyze/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ url: url })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // 성공: 결과 페이지로 이동
+                window.location.href = `/result/${data.id}/`;
+            } else {
+                // 에러 처리
+                alert('분석 중 오류가 발생했습니다: ' + (data.error || '알 수 없는 오류'));
+                submitBtn.innerHTML = originalHTML;
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+            submitBtn.innerHTML = originalHTML;
+            submitBtn.disabled = false;
+        }
     });
-});
 
-// 웹사이트 파비콘 가져오기 함수
-function getFavicon(url) {
-    try {
-        const urlObj = new URL(url);
-        return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=32`;
-    } catch {
-        return '🌐'; // 기본 이모지
-    }
-}
-
-// 샘플 아이템에 파비콘 적용 (페이지 로드시)
-document.addEventListener('DOMContentLoaded', function() {
+    // 파비콘 적용
     const sampleItems = document.querySelectorAll('.sample-item');
     sampleItems.forEach(item => {
-        const urlText = item.querySelector('.sample-url').textContent;
+        const urlText = item.querySelector('.sample-url')?.textContent;
         const iconElement = item.querySelector('.sample-icon');
 
-        // 파비콘 이미지로 교체
-        const faviconUrl = getFavicon('https://' + urlText);
-        iconElement.innerHTML = `<img src="${faviconUrl}" alt="icon" style="width: 18px; height: 18px;" onerror="this.style.display='none'; this.parentElement.textContent='🌐';">`;
+        if (urlText && iconElement && !iconElement.querySelector('img')) {
+            const faviconUrl = `https://www.google.com/s2/favicons?domain=${urlText}&sz=32`;
+            iconElement.innerHTML = `<img src="${faviconUrl}" alt="icon" style="width: 18px; height: 18px;" onerror="this.style.display='none'; this.parentElement.textContent='🌐';">`;
+        }
     });
 });
 </script>

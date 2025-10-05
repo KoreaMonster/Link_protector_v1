@@ -45,10 +45,10 @@ class URLAnalyzeRequestSerializer(serializers.Serializer):
     )
 
     def validate_url(self, value):
-        #URL 유효성 검증
-        if not (value.startwith('http://') or value.startwith("https://")):
+        """URL 유효성 검증"""
+        if not (value.startswith('http://') or value.startswith("https://")):
             raise serializers.ValidationError(
-                "URL은 http:// 또는 https://로 시작해야합니다."
+                "URL은 http:// 또는 https://로 시작해야 합니다."
             )
         return value
 

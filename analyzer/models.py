@@ -73,7 +73,16 @@ class URLAnalysis(models.Model):
         verbose_name= "위험도 점수",
         help_text= "0-100사이 값, 높을 수록 위험"
     )
-
+    risk_level = models.CharField(
+        max_length=20,
+        choices=[
+            ('low', '낮음'),
+            ('medium', '중간'),
+            ('high', '높음'),
+        ],
+        default='low',
+        verbose_name="위험 수준"
+    )
     #상세분석 데이터 JSON
     detail_data = models.JSONField(
         blank= True,

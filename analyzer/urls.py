@@ -12,6 +12,8 @@ router.register('analysis', views.URLAnalysisViewSet, basename='analysis')
 urlpatterns = [
     # 메인 페이지 (URL 입력)
     path('', views.IndexView.as_view(), name='index'),
+    # 결과 페이지 (Template)
+    path('result/<int:pk>/', views.AnalysisDetailView.as_view(), name='result'),
 
     #api 앤드포인트
     path('api/analyze/', views.AnalyzeAPIView.as_view(), name='api_analyze'),
