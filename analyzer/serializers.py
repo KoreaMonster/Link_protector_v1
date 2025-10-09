@@ -17,7 +17,7 @@ class URLAnalysisSerializer(serializers.ModelSerializer):
             'final_url',
             'domain',
             'page_title',
-            'screenshot',
+            'screenshot_path',
             'analyzed_at',
             'analyzed_at_formatted',
             'network_requests',

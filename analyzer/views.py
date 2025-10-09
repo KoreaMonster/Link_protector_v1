@@ -142,7 +142,9 @@ class AnalyzeAPIView(APIView):
                 docker_command,
                 capture_output=True,  # 출력 내용 받기
                 text=True,  # 문자열로 받기
-                timeout=120  # 최대 60초 (너무 오래 걸리면 중단)
+                timeout=120,  # 최대 60초 (너무 오래 걸리면 중단)
+                encoding = 'utf-8',
+                errors = 'replace',
             )
 
             # 5단계: 실행 결과 확인
@@ -275,7 +277,7 @@ class AnalysisDetailView(APIView):
             'domain': url_analysis.domain,
             'ip_address': url_analysis.ip_address,
             'analyzed_at': url_analysis.analyzed_at.strftime('%Y년 %m월 %d일 %H:%M:%S'),
-            'screenshot': url_analysis.screenshot.url if url_analysis.screenshot else None,
+            'screenshot_path': url_analysis.screenshot_path.url if url_analysis.screenshot_path else None,
             'network_requests': url_analysis.network_requests,
             'redirects': url_analysis.redirects,
             'js_errors': url_analysis.js_errors,

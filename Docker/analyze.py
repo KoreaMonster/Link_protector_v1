@@ -18,7 +18,7 @@ def analyze_url(url):
 
     # Chrome 옵션 설정
     options = Options()
-    # options.add_argument('--headless')  # 화면 없이 실행
+    options.add_argument('--headless')  # 화면 없이 실행
     options.add_argument('--no-sandbox')  # Docker 필수!
     options.add_argument('--disable-dev-shm-usage')  # 메모리 이슈 방지
     options.add_argument('--disable-gpu')  # GPU 비활성화
