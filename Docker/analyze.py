@@ -1,5 +1,6 @@
 import sys
 import json
+import uuid
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
@@ -22,6 +23,14 @@ def analyze_url(url):
     options.add_argument('--disable-dev-shm-usage')  # 메모리 이슈 방지
     options.add_argument('--disable-gpu')  # GPU 비활성화
     options.add_argument('--window-size=1920,1080')  # 초기 창 크기
+
+    # 고유한 user-data-dir 설정 (충돌 방지!)
+    unique_id = str(uuid.uuid4())[:8]
+    options.add_argument(f'--user-data-dir=/tmp/chrome-{unique_id}')
+
+    # 추가 안정성 옵션
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-software-rasterizer')
 
     # Chrome 드라이버 실행
     driver = webdriver.Chrome(options=options)

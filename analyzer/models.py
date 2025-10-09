@@ -41,7 +41,7 @@ class URLAnalysis(models.Model):
 
     #분석 시간
     analyzed_at = models.DateTimeField(
-        auto_now_add=True,  # ✅ 생성 시 자동으로 현재 시간
+        auto_now_add=True,  # 생성 시 자동으로 현재 시간
         verbose_name="분석 시간"
     )
 
