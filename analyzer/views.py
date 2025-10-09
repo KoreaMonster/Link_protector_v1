@@ -10,7 +10,12 @@ from .serializers import (
     URLAnalyzeRequestSerializer,
     RecentURLSerializer
 )
-
+import subprocess
+import uuid
+from pathlib import Path
+from django.conf import settings
+import json
+from urllib.parse import urlparse
 
 class IndexView(APIView):
     """
@@ -72,18 +77,28 @@ class AnalyzeAPIView(APIView):
         # 3. URL 분석 수행 (현재는 데모 데이터)
         analysis_result = self.analyze_url(url)
 
+        parsed_url = urlparse(analysis_result['final_url'])
+        domain = parsed_url.netloc
+        # parsed.netloc   # 'www.example.com:8080' (도메인)
+
         # 4. 데이터베이스에 저장
         url_analysis = URLAnalysis.objects.create(
+            # Docker에서 받은 데이터
             original_url=analysis_result['original_url'],
             final_url=analysis_result['final_url'],
-            domain=analysis_result['domain'],
             page_title=analysis_result['page_title'],
-            ip_address=analysis_result['ip_address'],
-            network_requests=int(analysis_result['network_requests']),
-            redirects=int(analysis_result['redirects']),
-            js_errors=int(analysis_result['js_errors']),
-            risk_score=int(analysis_result['risk_score']),
-            risk_level=analysis_result['risk_level'],
+            screenshot_path=analysis_result.get('screenshot_path', ''),
+
+            # 직접 추출한 데이터
+            domain=domain,
+
+            # 임시값 (Phase 6, 7에서 실제 구현 예정)
+            ip_address='0.0.0.0',
+            network_requests=0,
+            redirects=0,
+            js_errors=0,
+            risk_score=25,
+            risk_level='low',
         )
 
         # 5. 저장된 데이터를 Serializer로 변환하여 응답
@@ -94,38 +109,70 @@ class AnalyzeAPIView(APIView):
             status=status.HTTP_201_CREATED
         )
 
+
     def analyze_url(self, url):
         """
-        URL 분석 로직
+        URL 분석 로직 - Docker 컨테이너 실행
 
-        현재는 데모 데이터를 반환합니다.
-        Phase 4에서 Docker + Selenium으로 실제 분석을 구현할 예정입니다.
-
-        Args:
-            url (str): 분석할 URL
-
-        Returns:
-            dict: 분석 결과 데이터
+        왜 Docker를 실행하나?
+        - 악성 URL이 서버를 공격할 수 있음
+        - Docker는 격리된 환경 = 안전
         """
-        parsed_url = urlparse(url)
-        domain = parsed_url.netloc
 
-        # 데모 데이터 생성
-        result = {
-            'original_url': url,
-            'final_url': url,  # 리다이렉션 없다고 가정
-            'page_title': f'{domain} 웹사이트',
-            'domain': domain,
-            'ip_address': '123.456.78.90',  # 데모 IP
-            'network_requests': '12',
-            'redirects': '0',
-            'js_errors': '0',
-            'risk_score': '25',
-            'risk_level': 'low',
-        }
+        # id를 생성 -> 여러 사람이 동시에 분석 진행하는 것 구분하려고 / 8자
+        analysis_id = str(uuid.uuid4())[:8]
+        #결과를 저장하는 폴더 생성 -> id로 구분되도록
+        results_dir = Path(settings.BASE_DIR) / 'results' / analysis_id
+        results_dir.mkdir(parents=True, exist_ok=True)
 
-        return result
+        print(f"📁 결과 폴더 생성: {results_dir}")
 
+        #Docker 실행명령
+        docker_command = [
+            'docker', 'run',
+            '--rm',
+            '-v', f'{results_dir}:/output',  # 폴더 공유
+            'selenium-analyzer',  # 우리가 만든 이미지
+            'python', 'analyze.py', url  # 실행할 명령
+        ]
+        print(f"🐳 Docker 실행 중...")
+
+        try:
+            result = subprocess.run(
+                docker_command,
+                capture_output=True,  # 출력 내용 받기
+                text=True,  # 문자열로 받기
+                timeout=120  # 최대 60초 (너무 오래 걸리면 중단)
+            )
+
+            # 5단계: 실행 결과 확인
+            if result.returncode != 0:  # 0이 아니면 오류
+                print(f"❌ Docker 오류: {result.stderr}")
+                raise Exception(f"Docker 실행 실패: {result.stderr}")
+
+            print(f"✅ Docker 실행 완료!")
+
+        except subprocess.TimeoutExpired:
+            print(f"⏰ 시간 초과 (120초)")
+            raise Exception("분석 시간 초과")
+
+        # 6단계: 결과 파일 읽기
+
+        result_file = results_dir / 'result.json'
+        screenshot_file = results_dir / 'screenshot.png'
+
+        # JSON 파일 읽기
+        with open(result_file, 'r', encoding='utf-8') as f:
+            analysis_result = json.load(f)
+
+        # 스크린샷 경로 추가
+        if screenshot_file.exists():
+            # 상대 경로로 저장 (웹에서 접근 가능하게)
+            analysis_result['screenshot_path'] = f'/results/{analysis_id}/screenshot.png'
+
+        print(f"📊 분석 결과: {analysis_result['page_title']}")
+
+        return analysis_result
 
 class URLAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
     """

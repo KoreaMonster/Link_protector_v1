@@ -31,12 +31,12 @@ class URLAnalysis(models.Model):
         verbose_name= "페이지 제목"
     )
 
-    #스크린샷(나중에 기능 구현할 것)
-    screenshot = models.ImageField(
-        upload_to= "screenshots/",
-        blank= True,
-        null= True,
-        verbose_name= "스크린샷"
+    # 스크린샷 경로 (이것만 사용)
+    screenshot_path = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name="스크린샷 경로"
     )
 
     #분석 시간
