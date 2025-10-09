@@ -125,7 +125,7 @@ class AnalyzeAPIView(APIView):
         results_dir = Path(settings.BASE_DIR) / 'results' / analysis_id
         results_dir.mkdir(parents=True, exist_ok=True)
 
-        print(f"📁 결과 폴더 생성: {results_dir}")
+        print(f"결과 폴더 생성: {results_dir}")
 
         #Docker 실행명령
         docker_command = [
@@ -135,7 +135,7 @@ class AnalyzeAPIView(APIView):
             'selenium-analyzer',  # 우리가 만든 이미지
             'python', 'analyze.py', url  # 실행할 명령
         ]
-        print(f"🐳 Docker 실행 중...")
+        print(f"Docker 실행 중...")
 
         try:
             result = subprocess.run(
@@ -147,13 +147,13 @@ class AnalyzeAPIView(APIView):
 
             # 5단계: 실행 결과 확인
             if result.returncode != 0:  # 0이 아니면 오류
-                print(f"❌ Docker 오류: {result.stderr}")
+                print(f"Docker 오류: {result.stderr}")
                 raise Exception(f"Docker 실행 실패: {result.stderr}")
 
-            print(f"✅ Docker 실행 완료!")
+            print(f"Docker 실행 완료!")
 
         except subprocess.TimeoutExpired:
-            print(f"⏰ 시간 초과 (120초)")
+            print(f"시간 초과 (120초)")
             raise Exception("분석 시간 초과")
 
         # 6단계: 결과 파일 읽기
@@ -170,7 +170,7 @@ class AnalyzeAPIView(APIView):
             # 상대 경로로 저장 (웹에서 접근 가능하게)
             analysis_result['screenshot_path'] = f'/results/{analysis_id}/screenshot.png'
 
-        print(f"📊 분석 결과: {analysis_result['page_title']}")
+        print(f"분석 결과: {analysis_result['page_title']}")
 
         return analysis_result
 

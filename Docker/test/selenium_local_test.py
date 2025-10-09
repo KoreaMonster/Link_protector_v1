@@ -39,8 +39,8 @@ try:
     # 전체 페이지 높이 가져오기
     total_height = driver.execute_script("return document.body.scrollHeight")
     viewport_height = driver.execute_script("return window.innerHeight")
-    print(f"📏 전체 높이: {total_height}px")
-    print(f"📏 보이는 높이: {viewport_height}px")
+    print(f" 전체 높이: {total_height}px")
+    print(f" 보이는 높이: {viewport_height}px")
 
     # 방법 1: 브라우저 높이를 페이지 전체 높이로 설정
     driver.set_window_size(1920, total_height)
@@ -48,10 +48,10 @@ try:
     # 스크린샷
     screenshot_path = "test_screenshot.png"
     driver.save_screenshot(screenshot_path)
-    print(f"📸 전체 페이지 스크린샷 저장: {screenshot_path}")
+    print(f" 전체 페이지 스크린샷 저장: {screenshot_path}")
 
 except Exception as e:
-    print(f"❌ 오류 발생: {e}")
+    print(f" 오류 발생: {e}")
     import traceback
 
     traceback.print_exc()
