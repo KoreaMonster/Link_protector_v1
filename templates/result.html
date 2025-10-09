@@ -40,8 +40,8 @@
     </div>
     <div class="card-body">
         <div class="screenshot-container">
-            {% if result.screenshot %}
-                <img src="{{ result.screenshot }}" alt="페이지 스크린샷" class="screenshot-img">
+            {% if result.screenshot_path %}
+                <img src="{{ result.screenshot_path }}" alt="페이지 스크린샷" class="screenshot-img">
             {% else %}
                 <div class="screenshot-placeholder">
                     <div class="placeholder-icon">🖼️</div>

@@ -277,7 +277,7 @@ class AnalysisDetailView(APIView):
             'domain': url_analysis.domain,
             'ip_address': url_analysis.ip_address,
             'analyzed_at': url_analysis.analyzed_at.strftime('%Y년 %m월 %d일 %H:%M:%S'),
-            'screenshot_path': url_analysis.screenshot_path.url if url_analysis.screenshot_path else None,
+            'screenshot_path': url_analysis.screenshot_path,
             'network_requests': url_analysis.network_requests,
             'redirects': url_analysis.redirects,
             'js_errors': url_analysis.js_errors,
